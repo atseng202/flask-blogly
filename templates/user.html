@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    {{ user.get_full_name() }}
+    {{ user.full_name }}
 {% endblock %}
 
 {% block content %}
 
     <div>
-        <img src="{{user.image_url}}" alt="Image of {{ user.get_full_name() }}">
-        <h2>{{ user.get_full_name() }}</h2>
+        <img src="{{user.image_url}}" alt="Image of {{ user.full_name }}">
+        <h2>{{ user.full_name }}</h2>
         <a href="/users/{{user.id}}/edit">Edit</a>
         <form action="/users/{{user.id}}/delete" method="POST">
             <button type="submit">Delete</button>
