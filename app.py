@@ -197,3 +197,10 @@ def delete_post(post_id):
     db.session.commit()
 
     return redirect(f"/users/{post.user_id}")
+
+### ERROR ROUTE ###
+@app.errorhandler(404)
+def page_not_found(e):
+    """ Shows the error page when user browses a page that does not exist """
+
+    return render_template('404_error.html'), 404

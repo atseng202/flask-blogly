@@ -50,3 +50,9 @@ class Post(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
     user = db.relationship("User")
+
+    @property
+    def formatted_posted_date(self):
+        """ Formats the created_at DateTime value for Post instance """
+
+        return self.created_at.strftime("%a %b %d %Y, %I:%M:%S %p")
