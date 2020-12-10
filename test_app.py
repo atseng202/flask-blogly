@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from app import app, NO_USER_IMG_URL
+from app import app
 from models import db, User, Post
 
 # Use test database and don't clutter tests with SQL
@@ -27,15 +27,16 @@ class BloglyTestCase(TestCase):
         Post.query.delete()
         User.query.delete()
 
-        bruce = User(first_name="Bruce", last_name="Wayne", image_url=NO_USER_IMG_URL)
-        captain = User(
-            first_name="Captain", last_name="America", image_url=NO_USER_IMG_URL
-        )
+        bruce = User(first_name="Bruce", last_name="Wayne")
+        captain = User(first_name="Captain", last_name="America")
 
         db.session.add(bruce)
         db.session.add(captain)
 
         db.session.commit()
+
+        # Don't hard code ids
+        self.bruce_id = bruce.id
 
     def tearDown(self):
         """Clean up any fouled transaction."""
@@ -119,14 +120,14 @@ class BloglyTestCase(TestCase):
             self.assertIn("<h1>Create a user</h1>", html)
             self.assertIn('<button type="submit">Add</button>', html)
 
+    # TODO: break into two tests for success and failure
     def test_process_new_post_form(self):
         """ Checks that the new post form is processed and redirects to the user's page """
 
         with app.test_client() as client:
             # Successful
-            bruce = User.query.get(1)
             resp = client.post(
-                f"/users/{bruce.id}/posts/new",
+                f"/users/{self.bruce_id}/posts/new",
                 data={"post_title": "I am", "post_content": "the Batman"},
                 follow_redirects=True,
             )
@@ -137,9 +138,8 @@ class BloglyTestCase(TestCase):
             self.assertIn("I am", html)
 
             # Failures
-            bruce = User.query.get(1)
             resp = client.post(
-                f"/users/{bruce.id}/posts/new",
+                f"/users/{self.bruce_id}/posts/new",
                 data={"post_title": "", "post_content": "the Batman"},
                 follow_redirects=True,
             )
@@ -149,10 +149,9 @@ class BloglyTestCase(TestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn("<h1>Add Post for Bruce Wayne</h1>", html)
             self.assertIn("Title cannot be empty!", html)
-            
-            bruce = User.query.get(1)
+
             resp = client.post(
-                f"/users/{bruce.id}/posts/new",
+                f"/users/{self.bruce_id}/posts/new",
                 data={"post_title": "", "post_content": ""},
                 follow_redirects=True,
             )

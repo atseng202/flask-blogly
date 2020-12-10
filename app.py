@@ -2,6 +2,7 @@
 
 from flask import Flask, request, redirect, render_template, flash
 from models import db, connect_db, User, Post
+from form_validation import is_form_invalid
 from flask_debugtoolbar import DebugToolbarExtension
 
 app = Flask(__name__)
@@ -17,10 +18,8 @@ connect_db(app)
 
 db.create_all()
 
-NO_USER_IMG_URL = "https://p16-va.tiktokcdn.com/img/musically-maliva-obj/1662917669574661~c5_720x720.jpeg"
-
-
 ###### ROUTES FOR USERS ######
+
 
 @app.route("/")
 def redirect_to_users():
@@ -52,19 +51,14 @@ def process_new_user_form():
 
     first_name = request.form["first_name"] or None
     last_name = request.form["last_name"] or None
-    image_url = request.form["image_url"] or NO_USER_IMG_URL
+    image_url = request.form["image_url"] or None
 
-    form_input_labels = [
-        ('first_name', 'First Name'),
-        ('last_name', 'Last Name')]
+    form_input_labels = [("first_name", "First Name"), ("last_name", "Last Name")]
 
     if is_form_invalid(request.form, form_input_labels):
         return redirect("/users/new")
 
-    new_user = User(
-        first_name=first_name,
-        last_name=last_name,
-        image_url=image_url)
+    new_user = User(first_name=first_name, last_name=last_name, image_url=image_url)
 
     db.session.add(new_user)
     db.session.commit()
@@ -93,9 +87,7 @@ def process_edit_user_form(user_id):
     if form input invalid or update user data in the database
     """
 
-    form_input_labels = [
-        ('first_name', 'First Name'),
-        ('last_name', 'Last Name')]
+    form_input_labels = [("first_name", "First Name"), ("last_name", "Last Name")]
 
     if is_form_invalid(request.form, form_input_labels):
         return redirect(f"/users/{user_id}/edit")
@@ -103,7 +95,7 @@ def process_edit_user_form(user_id):
     user = User.query.get(user_id)
     user.first_name = request.form["first_name"] or None
     user.last_name = request.form["last_name"] or None
-    user.image_url = request.form["image_url"] or NO_USER_IMG_URL
+    user.image_url = request.form["image_url"] or None
 
     db.session.commit()
 
@@ -120,36 +112,8 @@ def delete_user(user_id):
 
     return redirect("/users")
 
-
-def is_form_invalid(form_data, form_input_labels):
-    """Checks the new user or edit user form data and
-    makes sure that first_name and last_name are not empty.
-    If there are invalid inputs, adds flash error messages
-    and returns T/F.
-    """
-
-    invalid_ind = False
-
-    for (key, label) in form_input_labels:
-        if not form_data[key]:
-            flash(f'{label} cannot be empty!')
-            invalid_ind = True
-
-    return invalid_ind
-
-    # first_name = formData["first_name"] or None
-    # last_name = formData["last_name"] or None
-
-    # if not first_name:
-    #     flash("First name cannot be empty!")
-
-    # if not last_name:
-    #     flash("Last name cannot be empty!")
-
-    # return not first_name or not last_name
-
-
 ###### ROUTES FOR POSTS ######
+
 
 @app.route("/users/<int:user_id>/posts/new")
 def show_new_post_form(user_id):
@@ -165,24 +129,23 @@ def process_new_post_form(user_id):
     if form input invalid or add the new post in the database
     """
 
-    form_input_labels = [
-        ('post_title', 'Title'),
-        ('post_content', 'Content')]
+    form_input_labels = [("post_title", "Title"), ("post_content", "Content")]
 
     if is_form_invalid(request.form, form_input_labels):
         return redirect(f"/users/{user_id}/posts/new")
 
-    user = User.query.get_or_404(user_id)
+    User.query.get_or_404(user_id)
 
     new_post = Post(
-        title=request.form['post_title'],
-        content=request.form['post_content'],
-        user_id=user_id)
+        title=request.form["post_title"],
+        content=request.form["post_content"],
+        user_id=user_id,
+    )
 
     db.session.add(new_post)
     db.session.commit()
 
-    return redirect(f'/users/{user_id}')
+    return redirect(f"/users/{user_id}")
 
 
 @app.route("/posts/<int:post_id>")
@@ -207,9 +170,7 @@ def process_edit_post_form(post_id):
     if form input invalid or edit the post in the database
     """
 
-    form_input_labels = [
-        ('post_title', 'Title'),
-        ('post_content', 'Content')]
+    form_input_labels = [("post_title", "Title"), ("post_content", "Content")]
 
     if is_form_invalid(request.form, form_input_labels):
         return redirect(f"/posts/{post_id}/edit")
@@ -222,16 +183,17 @@ def process_edit_post_form(post_id):
     db.session.add(post)
     db.session.commit()
 
-    return redirect(f'/posts/{post_id}')
+    return redirect(f"/posts/{post_id}")
+
 
 @app.route("/posts/<int:post_id>/delete", methods=["POST"])
 def delete_post(post_id):
     """ Deletes the post with associated post id """
 
     post = Post.query.get_or_404(post_id)
-    db.session.delete(post)
+    # db.session.delete(post)
+    # db.session.commit()
+    Post.query.filter_by(id=post_id).delete()
     db.session.commit()
-    # Post.query.filter_by(id=post_id).delete()
-    # breakpoint()
 
     return redirect(f"/users/{post.user_id}")

@@ -1,6 +1,6 @@
 """Seed file to make sample data for blogly db."""
 
-from models import User, db
+from models import User, Post, db
 from app import app
 
 # Create all tables
@@ -8,6 +8,7 @@ db.drop_all()
 db.create_all()
 
 # If table isn't empty, empty it
+Post.query.delete()
 User.query.delete()
 
 # user1 = User(first_name="Alan", last_name="Tseng")
