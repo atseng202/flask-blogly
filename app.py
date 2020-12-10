@@ -33,8 +33,7 @@ def redirect_to_users():
 def show_all_users():
     """ Show all users of app """
 
-    users = User.query.all()
-    # .order_by('last_name').
+    users = User.query.order_by(User.last_name, User.first_name).all()
     return render_template("users.html", users=users)
 
 
