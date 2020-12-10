@@ -224,3 +224,15 @@ def process_edit_post_form(post_id):
     db.session.commit()
 
     return redirect(f'/posts/{post_id}')
+
+@app.route("/posts/<int:post_id>/delete", methods=["POST"])
+def delete_post(post_id):
+    """ Deletes the post with associated post id """
+
+    post = Post.query.get_or_404(post_id)
+    db.session.delete(post)
+    db.session.commit()
+    # Post.query.filter_by(id=post_id).delete()
+    # breakpoint()
+
+    return redirect(f"/users/{post.user_id}")
