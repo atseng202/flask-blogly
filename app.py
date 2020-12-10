@@ -51,15 +51,6 @@ def process_user_form():
     last_name = request.form['last_name'] or None
     image_url = request.form['image_url'] or NO_USER_IMG_URL
 
-    # if not first_name:
-    #     flash('First name cannot be empty!')
-
-    # if not last_name:
-    #     flash('Last name cannot be empty!')
-
-    # if not first_name or not last_name:
-    #     return redirect('/users/new')
-
     if is_form_invalid():
         return redirect('/users/new')
 
@@ -92,19 +83,6 @@ def process_edit_user_form(user_id):
     """ Get the edit user form data and flash error messages
      if form input invalid or update user data in the database
     """
-
-    # first_name = request.form['first_name'] or None
-    # last_name = request.form['last_name'] or None
-    # image_url = request.form['image_url'] or NO_USER_IMG_URL
-
-    # if not first_name:
-    #     flash('First name cannot be empty!')
-
-    # if not last_name:
-    #     flash('Last name cannot be empty!')
-
-    # if not first_name or not last_name:
-    #     return redirect(f'/users/{user_id}/edit')
 
     if is_form_invalid():
         return redirect(f'/users/{user_id}/edit')

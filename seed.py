@@ -10,12 +10,12 @@ db.create_all()
 # If table isn't empty, empty it
 User.query.delete()
 
-user1 = User(first_name="Alan", last_name="Tseng")
-user2 = User(first_name="Sean", last_name="Kim")
+# user1 = User(first_name="Alan", last_name="Tseng")
+# user2 = User(first_name="Sean", last_name="Kim")
 
 #add users to sesh
-db.session.add(user1)
-db.session.add(user2)
+# db.session.add(user1)
+# db.session.add(user2)
 
 #commit
-db.session.commit()
+# db.session.commit()
