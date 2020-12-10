@@ -12,6 +12,7 @@
             <input 
                 type="text"
                 name="first_name"
+                id="first_name"
                 value="{{user.first_name}}">
         </div>
         <div>
@@ -19,6 +20,7 @@
             <input 
                 type="text"
                 name="last_name"
+                id="last_name"
                 value="{{user.last_name}}">
         </div>
         <div>
@@ -26,10 +28,12 @@
             <input 
                 type="url"
                 name="image_url"
+                id="image_url"
                 value="{{user.image_url}}">
         </div>
         <div>
-            <a href="/users/{{user.id}}">Cancel</a>
+            <!-- <a href="/users/{{user.id}}">Cancel</a> -->
+            <button formaction="/users/{{user.id}}" formmethod="GET">Cancel</button>
             <button type="submit">Save</button>
         </div>
         

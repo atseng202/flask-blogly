@@ -36,8 +36,6 @@ class BloglyTestCase(TestCase):
 
         db.session.commit()
 
-        # self.pet_id = pet.id
-
     def tearDown(self):
         """Clean up any fouled transaction."""
 

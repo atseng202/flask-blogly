@@ -32,6 +32,7 @@ def show_all_users():
     """ Show all users of app """
 
     users = User.query.all()
+    # .order_by('last_name').
     return render_template("users.html", users=users)
 
 
@@ -43,7 +44,7 @@ def show_new_user_form():
 
 
 @app.route("/users/new", methods=["POST"])
-def process_user_form():
+def process_new_user_form():
     """Get the new user form data and flash error messages
     if form input invalid or add the new user in the database
     """
@@ -52,10 +53,13 @@ def process_user_form():
     last_name = request.form["last_name"] or None
     image_url = request.form["image_url"] or NO_USER_IMG_URL
 
-    if is_form_invalid():
+    if is_form_invalid(request.form):
         return redirect("/users/new")
 
-    new_user = User(first_name=first_name, last_name=last_name, image_url=image_url)
+    new_user = User(
+        first_name=first_name, 
+        last_name=last_name, 
+        image_url=image_url)
 
     db.session.add(new_user)
     db.session.commit()
@@ -84,7 +88,7 @@ def process_edit_user_form(user_id):
     if form input invalid or update user data in the database
     """
 
-    if is_form_invalid():
+    if is_form_invalid(request.form):
         return redirect(f"/users/{user_id}/edit")
 
     user = User.query.get(user_id)
@@ -108,14 +112,14 @@ def delete_user(user_id):
     return redirect("/users")
 
 
-def is_form_invalid():
+def is_form_invalid(formData):
     """Checks the new user or edit user form data and
     makes sure that first_name and last_name are not empty.
     If there are invalid inputs, adds flash error messages
     and returns T/F.
     """
-    first_name = request.form["first_name"] or None
-    last_name = request.form["last_name"] or None
+    first_name = formData["first_name"] or None
+    last_name = formData["last_name"] or None
 
     if not first_name:
         flash("First name cannot be empty!")
