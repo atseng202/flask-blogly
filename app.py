@@ -115,12 +115,14 @@ def delete_user(user_id):
 
 ###### ROUTES FOR POSTS ######
 
+
 @app.route("/users/<int:user_id>/posts/new")
 def show_new_post_form(user_id):
     """ Displays the page for adding a post """
     user = User.query.get_or_404(user_id)
+    tags = Tag.query.all()
 
-    return render_template("post-new.html", user=user)
+    return render_template("post-new.html", user=user, tags=tags)
 
 
 @app.route("/users/<int:user_id>/posts/new", methods=["POST"])
@@ -142,6 +144,15 @@ def process_new_post_form(user_id):
         user_id=user_id,
     )
 
+    tag_names = request.form.getlist("tag_name")
+    tags = Tag.query.filter(Tag.name.in_(tag_names)).all()
+    new_post.tags = tags
+
+    # May be inefficient to query this many times
+    # for tag_name in tag_names:
+    #     new_tag = Tag.query.filter_by(name=tag_name).one()
+    #     new_post.tags.append(new_tag)
+
     db.session.add(new_post)
     db.session.commit()
 
@@ -160,8 +171,9 @@ def show_post_page(post_id):
 def show_edit_post_form(post_id):
     """ Shows the page to edit a post by the post ID """
     post = Post.query.get_or_404(post_id)
+    tags = Tag.query.all()
 
-    return render_template("post-edit.html", post=post)
+    return render_template("post-edit.html", post=post, all_tags=tags, initial_tags=post.tags)
 
 
 @app.route("/posts/<int:post_id>/edit", methods=["POST"])
@@ -179,6 +191,19 @@ def process_edit_post_form(post_id):
 
     post.title = request.form["post_title"]
     post.content = request.form["post_content"]
+
+    tag_names = request.form.getlist("tag_name")
+
+    # Use filter to grab updated tags, did not figure this out ourselves, tried to grab tags one by one
+    # see below
+    tags = Tag.query.filter(Tag.name.in_(tag_names)).all()
+    post.tags = tags
+
+    # PostTag.filter_by(tag_id=new_tag.id).delete()
+    # May be inefficient to query this many times
+    # for tag_name in tag_names:
+    #     new_tag = Tag.query.filter_by(name=tag_name).one()
+    #     post.tags.append(new_tag)
 
     db.session.add(post)
     db.session.commit()
@@ -211,7 +236,7 @@ def show_tags():
 @app.route("/tags/<int:tag_id>")
 def show_tag_page(tag_id):
     """ Shows the page for tag details by tag_id """
-    
+
     tag = Tag.query.get_or_404(tag_id)
     return render_template("tag.html", tag=tag)
 
@@ -219,7 +244,7 @@ def show_tag_page(tag_id):
 @app.route("/tags/new")
 def show_new_tag_form():
     """" Displays the page for adding a tag """
-        
+
     return render_template("tag-new.html")
 
 
@@ -228,9 +253,9 @@ def process_new_tag_form():
     """Get the new tag form data and flash error messages
     if form input invalid or add the new tag in the database
     """
-    
+
     tag_name = request.form["tag_name"] or None
-    
+
     form_input_labels = [("tag_name", "Tag Name")]
 
     if is_form_invalid(request.form, form_input_labels):
@@ -259,9 +284,9 @@ def process_edit_tag_form(tag_id):
     """
 
     Tag.query.get_or_404(tag_id)
-   
+
     tag_name = request.form["tag_name"] or None
-    
+
     form_input_labels = [("tag_name", "Tag Name")]
 
     if is_form_invalid(request.form, form_input_labels):
@@ -294,4 +319,4 @@ def delete_tag(tag_id):
 def page_not_found(e):
     """ Shows the error page when user browses a page that does not exist """
 
-    return render_template('404_error.html'), 404
+    return render_template("404_error.html"), 404

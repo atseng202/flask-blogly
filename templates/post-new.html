@@ -23,6 +23,16 @@
                 placeholder="Enter post content here">
             </textarea>
         </div>
+
+        <div>
+            {% for tag in tags %}
+                <input type="checkbox" id="tag_name" name="tag_name" value="{{tag.name}}">
+                <label for="tag_name">{{tag.name}}</label><br>
+            {% endfor %}    
+
+        </div>
+        
+
         <div>
             <button formaction="/users/{{user.id}}" formmethod="GET">Cancel</button>
             <button type="submit">Add</button>

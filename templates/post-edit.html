@@ -19,6 +19,14 @@
             <label for="post_content">Content</label>
             <textarea name="post_content" id="post_content">{{post.content}}</textarea>
         </div>
+
+        <div>
+            {% for tag in all_tags %}
+                <input type="checkbox" id="tag_name" name="tag_name" value="{{tag.name}}" {% if tag in initial_tags %} checked {% endif %}>
+                <label for="tag_name">{{tag.name}}</label><br>
+            {% endfor %}    
+        </div>
+
         <div>
             <button formaction="/users/{{post.user_id}}" formmethod="GET">Cancel</button>
             <button type="submit">Edit</button>
