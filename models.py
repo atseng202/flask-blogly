@@ -51,8 +51,39 @@ class Post(db.Model):
 
     user = db.relationship("User")
 
+    # post_tags = db.relationship("PostTag", cascade="all, delete")
+
     @property
     def formatted_posted_date(self):
         """ Formats the created_at DateTime value for Post instance """
 
         return self.created_at.strftime("%a %b %d %Y, %I:%M:%S %p")
+
+
+class Tag(db.Model):
+    """ Tag model """
+
+    __tablename__ = 'tags'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.Text, nullable=False, unique=True)
+
+    #Why can't we delete tag with cascade?
+    # post_tags = db.relationship("PostTag", cascade="all, delete")
+
+    posts = db.relationship("Post",
+                            secondary="posts_tags",
+                            backref="tags")
+
+
+class PostTag(db.Model):
+    """ Model joins the Post and Tag models """
+
+    __tablename__ = 'posts_tags'
+
+    post_id = db.Column(db.Integer,
+                        db.ForeignKey("posts.id"),
+                        primary_key=True)
+    tag_id = db.Column(db.Integer,
+                       db.ForeignKey("tags.id"),
+                       primary_key=True)

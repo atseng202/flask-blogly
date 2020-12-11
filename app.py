@@ -1,7 +1,7 @@
 """Blogly application."""
 
 from flask import Flask, request, redirect, render_template, flash
-from models import db, connect_db, User, Post
+from models import db, connect_db, User, Post, Tag, PostTag
 from form_validation import is_form_invalid
 from flask_debugtoolbar import DebugToolbarExtension
 
@@ -112,8 +112,8 @@ def delete_user(user_id):
 
     return redirect("/users")
 
-###### ROUTES FOR POSTS ######
 
+###### ROUTES FOR POSTS ######
 
 @app.route("/users/<int:user_id>/posts/new")
 def show_new_post_form(user_id):
@@ -197,6 +197,97 @@ def delete_post(post_id):
     db.session.commit()
 
     return redirect(f"/users/{post.user_id}")
+
+
+###### ROUTES FOR TAGS ######
+@app.route("/tags")
+def show_tags():
+    """ Shows page with all tags """
+    tags = Tag.query.order_by(Tag.name).all()
+
+    return render_template("tags.html", tags=tags)
+
+
+@app.route("/tags/<int:tag_id>")
+def show_tag_page(tag_id):
+    """ Shows the page for tag details by tag_id """
+    
+    tag = Tag.query.get_or_404(tag_id)
+    return render_template("tag.html", tag=tag)
+
+
+@app.route("/tags/new")
+def show_new_tag_form():
+    """" Displays the page for adding a tag """
+        
+    return render_template("tag-new.html")
+
+
+@app.route("/tags/new", methods=["POST"])
+def process_new_tag_form():
+    """Get the new tag form data and flash error messages
+    if form input invalid or add the new tag in the database
+    """
+    
+    tag_name = request.form["tag_name"] or None
+    
+    form_input_labels = [("tag_name", "Tag Name")]
+
+    if is_form_invalid(request.form, form_input_labels):
+        return redirect("/tags/new")
+
+    new_tag = Tag(name=tag_name)
+
+    db.session.add(new_tag)
+    db.session.commit()
+
+    return redirect("/tags")
+
+
+@app.route("/tags/<int:tag_id>/edit")
+def show_edit_tag_form(tag_id):
+    """ Shows the page to edit a tag by the tag ID """
+    tag = Tag.query.get_or_404(tag_id)
+
+    return render_template("tag-edit.html", tag=tag)
+
+
+@app.route("/tags/<int:tag_id>/edit", methods=["POST"])
+def process_edit_tag_form(tag_id):
+    """Get the edit tag form data and flash error messages
+    if form input invalid or edit the tag in the database
+    """
+
+    Tag.query.get_or_404(tag_id)
+   
+    tag_name = request.form["tag_name"] or None
+    
+    form_input_labels = [("tag_name", "Tag Name")]
+
+    if is_form_invalid(request.form, form_input_labels):
+        return redirect(f"/tags/{tag_id}/edit")
+
+    tag = Tag.query.get(tag_id)
+    tag.name = tag_name
+
+    db.session.add(tag)
+    db.session.commit()
+
+    return redirect("/tags")
+
+
+@app.route("/tags/<int:tag_id>/delete", methods=["POST"])
+def delete_tag(tag_id):
+    """ Deletes the tag with associated tag id """
+    Tag.query.get_or_404(tag_id)
+
+    PostTag.query.filter_by(tag_id=tag_id).delete()
+
+    Tag.query.filter_by(id=tag_id).delete()
+    db.session.commit()
+
+    return redirect("/tags")
+
 
 ### ERROR ROUTE ###
 @app.errorhandler(404)
